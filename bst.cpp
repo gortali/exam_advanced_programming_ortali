@@ -4,6 +4,8 @@
 #include<memory>
 #include<vector>
 
+//TODO: noexcept?
+
 template<typename K, typename V, typename COMP = std::less<K>>
 class Bst{
 
@@ -102,6 +104,7 @@ class Bst{
     
     public:
 
+    //TODO: move to private?
     auto returnMin(Node* p) const noexcept{
         while(p->left){
             p=p->left.get();
@@ -112,6 +115,7 @@ class Bst{
     using iterator = _iterator<pair_type>;
     using const_iterator = _iterator<const pair_type>;
 
+    //TODO: move to private?
     //insert pair x in subtree having root in y
     //forwarding reference
     template<typename O>
@@ -207,6 +211,7 @@ class Bst{
         return const_cast<const_iterator>(find(x));
     }
 
+    //TODO: move to private?
     template<typename O>
     V& _subscript(O&& x){
         iterator i = find(std::forward<O>(x));
