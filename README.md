@@ -101,11 +101,35 @@ We also implement a const version of find, by using the above implementation
 and a const\_cast. This will be used in cases for which a const implementation
 is needed (find is never modifying the tree).
 
+We note that we could have used the implementation contained inside \_insert to
+also perform the find operation, to avoid some code duplication.
+
 The subscript operator is then implemented. This is implemented by using a
 forwarding reference on \_subscript, in order to consider both the const and
 non-const case. Inside \_subsript, we use find to find the element (if any).
 
-We now pass to erase. 
+We now pass to erase. The implementation of the function erase is based on the
+function eraseFromSubtree, which erases a node (identified with a key) from a
+subtree starting from root\_, operating recursively. In the end, erase will
+just call eraseFromSubtree on root.
+
+eraseFromSubtree works using the following algorithm:
+- if the subtree given is empty, do nothing;
+- if the key to ke deleted is less than the key corresponding to the root\_
+  node (the comparison is made using the templated comparison operator), then
+  call eraseFromSubtree on the left subtree;
+- the same if the key is bigger, passing the right subtree
+- if we found the key, we proceed as follows. We first find the min node in the
+  right subtree of the current node, which corresponds to the successive node
+  with respect to the current node. What we wish to do is to take this node,
+  and reset the current node with it. To do so, we need to be careful with
+  left, right and up nodes. In particular, we first save in three temporary
+  pointers the up, left and right of the current node (right and left are
+  released). We then create a new node containing the pair of the minimum node
+  found before, and reset the current node with this. Then, we update left,
+  right and up with the temporary pointers saved before. Then, we also upfate
+  values of up of the newly saved left and right. Finally, we erase the minimum
+  which we substituted.
 
 As for the balancing of the tree, we decided to proceed as follows. Inside the
 function balance, we build a vector of pairs storing the values contained in
@@ -113,33 +137,17 @@ the tree. After that, we pass this array to the function buildBalancedTree
 which builds a balanced tree starting from this vector, and reset the root with
 this newly built tree.
 
-The function buildBalancedTree proceeds by recursion. In particular, we 
+The function buildBalancedTree proceeds by recursion. In particular, the
+function accepts 3 arguments: the vector, and two numbers a and b that express
+the fact that we want to build the subtree for elements in the vector going
+from index a to index b. The, inside the function, we compute h as the mean
+point between a and b, and recursively build the subtrees going from a to h-1
+and from h+1 to b. Finally, we also need to update the values of the up
+pointers.
 
-We note that we could have used the implementation contained inside \_insert to
-also perform the find operation, to avoid some code duplication.
+Finally, we define the streaming operator << used to print the tree. This
+operator uses the iterators previously defined, and simply does a for loop on
+the tree streaming the value to os. 
 
-The BST is templated on:
-- K, type of the key
-- V, type of the value
-- COMP, 
-
-
-The generic node of the Binary Search Tree is defined as instance of the class 
-*Node*. A node is defined by:
-- item: a pair of key-value
-- left: a *unique_ptr<Node>* pointing to the left node below (if any)
-- right: a *unique_ptr<Node>* pointing to the right node below (if any)
-- up: a pointer to Node, pointing to the node above (if any)
-
-root is a *unique_ptr<Node>* that owns the Node corresponding to the root of 
-the tree. All the others Nodes are owned by the left or right item of some 
-other nodes. Instead, the up pointer is a simple pointer, hence caution must 
-be made in working with it (the Node it points to-ò+
-is owned by some unique\_ptr). 
-
-For the class node, we define a constructor from pair\_type, in two versions
-(copy and move), and a constructor from unique\_ptr to node that performs a 
-deep copy of a subtree starting from the node passed (recursively).
-We also define equality between Nodes: two nodes are equal if the key is equal.
-
-
+print and print_depth are functions used during the construction of the various
+algorithms in order to test the code.
