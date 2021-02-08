@@ -1,4 +1,4 @@
-#Binary search Tree#
+# Binary search Tree #
 
 The main class implementing the binary search tree is named **Bst**, templated as
 requested by the assignment. 
@@ -13,7 +13,7 @@ description of the iterator interface to the tree. Finally, we describe all the
 other functions of the class Bst, that extensively use the Node and Iterator
 implementations.
 
-##Node##
+## Node ##
 
 Each node is made up of:
 - **item**: an std::pair of key and value (keys are unique inside the tree),
@@ -45,7 +45,7 @@ if any.
 Moreover, we define the == operator that confronts the keys of the nodes
 (defined as friend inside the class).
 
-##Iterator##
+## Iterator ##
 
 Another item contained in the private implementation of Bst is the iterator
 class. This is contained in \_iterator, which is used to perform forwarding
