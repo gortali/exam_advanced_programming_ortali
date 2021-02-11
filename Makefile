@@ -7,4 +7,3 @@ CPPL = -std=c++11
 
 $bst: bst.cpp Makefile
 	$(CC) bst.cpp -o bst.o $(CPPL) -lm $(OPT_LEV) $(PROF) -Wall Wextra
-

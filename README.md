@@ -3,9 +3,7 @@
 The main class implementing the binary search tree is named **Bst**, templated as
 requested by the assignment. 
 
-Each node in the tree is represented by an object of the class **Node**, which
-we now describe.
-
+Each node in the tree is represented by an object of the class **Node**.
 The root of the tree is contained in a std::unique\_ptr<Node> called root.
 
 We first describe how the class Node is implemented. Then, we pass to a

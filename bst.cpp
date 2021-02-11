@@ -23,7 +23,7 @@ class Bst{
         
         //recursive build of tree starting from x
         explicit Node(const std::unique_ptr<Node>& x) : item{x->item}, up{nullptr}{
-            std::cout << "Node ctor"<< std::endl;
+            //std::cout << "Node ctor"<< std::endl;
             if(x->left){
                 left.reset(new Node{x->left});
                 left->up = this;
@@ -101,10 +101,6 @@ class Bst{
         }
     };
    
-    
-    public:
-
-    //TODO: move to private?
     auto returnMin(Node* p) const noexcept{
         while(p->left){
             p=p->left.get();
@@ -112,38 +108,26 @@ class Bst{
         return p;
     }
     
-    using iterator = _iterator<pair_type>;
-    using const_iterator = _iterator<const pair_type>;
-
-    //TODO: move to private?
-    //insert pair x in subtree having root in y
-    //forwarding reference
+    
     template<typename O>
-    std::pair<iterator, bool> _insert(O&& x, std::unique_ptr<Node>& y){
-        if(!y){
-            std::cout << "writing " << x.first << std::endl;
-            y.reset(new Node{std::forward<O>(x)});
-            y->up=nullptr;
-            return {iterator{y.get()},true};
+    V& _subscript(O&& x){
+        iterator i = find(std::forward<O>(x));
+        if(i!=end()){   //found!
+            return (*i).second;
         }
-        else if(comp(x.first,y->item.first)){
-            std::cout << "descending left..." << std::endl;
-            auto out = _insert(x, y->left);
-            y->left->up = y.get();      //assign up
-            return out;
-        }
-        else if(comp(y->item.first,x.first)){
-            std::cout << "descending right..." << std::endl;
-            auto out = _insert(x, y->right);
-            y->right->up = y.get();     //assign up
-            return out;
-        }
-        else{
-            std::cout << "already present!" << std::endl;
-            return{iterator{y.get()}, false};
+        else{           //not found, insert...
+            //auto ins = insert(pair_type(x,V()));
+            //if(ins.second)  //if insertion went fine
+            return (*(insert(pair_type{std::forward<O>(x),V{}}).first)).second;    //assume insertion went fine
         }
     }
     
+    public:
+
+    
+    using iterator = _iterator<pair_type>;
+    using const_iterator = _iterator<const pair_type>;
+
     Bst() = default;    //default ctor
     ~Bst() = default;   //default dtor
 
@@ -163,19 +147,46 @@ class Bst{
         return *this;
     }
 
+    //insert pair x in subtree having root in y
+    //forwarding reference
+    template<typename O>
+    std::pair<iterator, bool> _insert(O&& x, std::unique_ptr<Node>& y){
+        if(!y){
+            //std::cout << "writing " << x.first << std::endl;
+            y.reset(new Node{std::forward<O>(x)});
+            y->up=nullptr;
+            return {iterator{y.get()},true};
+        }
+        else if(comp(x.first,y->item.first)){
+            //std::cout << "descending left..." << std::endl;
+            auto out = _insert(x, y->left);
+            y->left->up = y.get();      //assign up
+            return out;
+        }
+        else if(comp(y->item.first,x.first)){
+            //std::cout << "descending right..." << std::endl;
+            auto out = _insert(x, y->right);
+            y->right->up = y.get();     //assign up
+            return out;
+        }
+        else{
+            //std::cout << "already present!" << std::endl;
+            return{iterator{y.get()}, false};
+        }
+    }
+    
     std::pair<iterator, bool> insert(const pair_type& x){ 
-        std::cout << "call to insert l-value " << std::endl;
+        //std::cout << "call to insert l-value " << std::endl;
         return _insert(x,root);
     }
     std::pair<iterator, bool> insert(pair_type&& x){ 
-        std::cout << "call to insert r-value" << std::endl;
+        //std::cout << "call to insert r-value" << std::endl;
         return _insert(std::move(x),root);
     }
     
-
     template< class... Types >
     std::pair<iterator,bool> emplace(Types&&... args){  
-        //assume correct argument passed...
+        //assume correct arguments passed...
         return insert(pair_type{args...});
     }
 
@@ -189,7 +200,6 @@ class Bst{
     auto end() noexcept             {return iterator{nullptr};}
     auto end() const noexcept       {return const_iterator{nullptr};}
     auto cend() const noexcept      {return const_iterator{nullptr};}
-
 
     iterator find(const K& x){
         Node* p= root.get();
@@ -211,20 +221,6 @@ class Bst{
         return const_cast<const_iterator>(find(x));
     }
 
-    //TODO: move to private?
-    template<typename O>
-    V& _subscript(O&& x){
-        iterator i = find(std::forward<O>(x));
-        if(i!=end()){   //found!
-            return (*i).second;
-        }
-        else{           //not found, insert...
-            //auto ins = insert(pair_type(x,V()));
-            //if(ins.second)  //if insertion went fine
-            return (*(insert(pair_type{std::forward<O>(x),V{}}).first)).second;    //assume insertion went fine
-        }
-    }
-
     V& operator[](const K& x){
         return _subscript(x);
     };
@@ -232,7 +228,6 @@ class Bst{
     V& operator[](K&& x){
         return _subscript(std::move(x));  
     };
-
 
     void eraseFromSubtree(std::unique_ptr<Node>& root_, const K& x){
         if(!root_)
@@ -293,6 +288,7 @@ class Bst{
         eraseFromSubtree(root, x);
     }
 
+    //old implementation
     /*void erase(const K& x){
         iterator i = find(x);
         if(i != end()){   //if node exists
@@ -365,15 +361,15 @@ class Bst{
 
     Node* buildBalancedTree(std::vector<pair_type> x, int a, int b){
         if(a>b){
-            std::cout << a << ">" << b << "!" << std::endl;
+            //std::cout << a << ">" << b << "!" << std::endl;
             return nullptr;
         }
         int h = a+(b-a)/2;  //half
-        std::cout << "building subtree from "<< a << " to " << b << " (half=" << h << ")" << std::endl;
+        //std::cout << "building subtree from "<< a << " to " << b << " (half=" << h << ")" << std::endl;
         Node* root_ = new Node{x[h]};
-        std::cout << "building left subtree from "<< a << " to " << h-1 << std::endl;
+        //std::cout << "building left subtree from "<< a << " to " << h-1 << std::endl;
         root_->left.reset(buildBalancedTree(x,a,h-1));
-        std::cout << "building left subtree from "<< h+1 << " to " << b << std::endl;
+        //std::cout << "building left subtree from "<< h+1 << " to " << b << std::endl;
         root_->right.reset(buildBalancedTree(x,h+1,b));
         if(root_->left){
             //std::cout << "left subtree of " << a << ", " <<  b << " has been built" << std::endl; 
@@ -386,12 +382,12 @@ class Bst{
     }
 
     void balance(){
-        std::cout << "balancing..."<< std::endl;
+        //std::cout << "balancing..."<< std::endl;
         std::vector<pair_type> v;
         for(auto i : *this){
             v.push_back(i);
         }
-        std::cout << "built support vector"<< std::endl;
+        //std::cout << "built support vector"<< std::endl;
         root.reset(buildBalancedTree(v,0,v.size()-1));
     };
 
@@ -399,9 +395,9 @@ class Bst{
         if(!root_)
             return;
         std::cout << root_->item.first << "\n";
-        std::cout << "going left..." << std::endl;
+        //std::cout << "going left..." << std::endl;
         print_depth(root_->left.get());
-        std::cout << "going right..." << std::endl;
+        //std::cout << "going right..." << std::endl;
         print_depth(root_->right.get());
     }
     
@@ -412,9 +408,9 @@ class Bst{
 
     friend
     std::ostream& operator<<(std::ostream& os, const Bst& x){
-        std::cout << "printing..." << std::endl;
-        //if(!x.root)
-        //    return os;
+        //std::cout << "printing..." << std::endl;
+        if(!x.root)
+            return os;
         for(auto tmp : x){
             os << tmp.second << ", ";
         }
@@ -434,55 +430,55 @@ int main(){
     a.emplace(3,"three");
     a[-3]=std::string("minus three");
     a[-7]=std::string("minus seven");
-    //a.insert(std::pair<int,std::string>{-3,"minus three"});
+    a.insert(std::pair<int,std::string>{-3,"minus three"});
     a.insert(std::pair<int,std::string>{-3,"minus three - bis"});
     a.insert(std::pair<int,std::string>{100,"one hundred"});
     
     //a.print();
-    std::cout << a << std::endl;
+    std::cout << "printing a...\n" << a << std::endl;
     //std::cout << a[100] << std::endl;
 
+    std::cout << "balancing..." << std::endl;
     a.balance();
     //a.print();
-    //std::cout << a << std::endl;
+    std::cout << "printing a...\n" << a << std::endl;
 
-    a.emplace(101,"one hundred and one");
-    a.emplace(-8,"minus eight");
-    
-    a.emplace(-6,"minus six");
-    a.emplace(-5,"minus five");
-    a.emplace(-4,"minus four");
-    
     //a.erase(100);
-    std::cout << a << std::endl;
+    std::cout << "erasing 1..." << std::endl;
     a.erase(1);
     std::cout << a << std::endl;
+    std::cout << "erasing -5..." << std::endl;
     a.erase(-5);
     std::cout << a << std::endl;
+    std::cout << "erasing -7..." << std::endl;
     a.erase(-7);
     std::cout << a << std::endl;
+    std::cout << "erasing 3..." << std::endl;
     a.erase(3);
     std::cout << a << std::endl;
-/*
 
-    std::cout << "found " << a.find(-5)->second << "!" << std::endl;
+    std::cout << "found -100? " << (a.find(100)!=a.end()) << "-->" <<
+        a.find(100)->second << std::endl;
     std::cout << "found -55? " << (a.find(-55)!=a.end()) << std::endl; 
 
+
+    std::cout << "copy ctor + insert -7..." << std::endl;
     Bst<int,std::string> b=a;
     b.insert(std::pair<int,std::string>{-7,"minus seven"});
     std::cout << b << std::endl;
 
+    std::cout << "clearing..." << std::endl;
     b.clear();
     std::cout << b << std::endl;
+    std::cout << "inserting -7..." << std::endl;
     b.insert(std::pair<int,std::string>{-7,"minus seven"});
     std::cout << b << std::endl;
 
+    std::cout << "copy assignment + insert 7..." << std::endl;
     Bst<int,std::string> c;
     c=a;
     c.insert(std::pair<int,std::string>{7,"seven"});
     std::cout << c << std::endl;
-
-*/
 
 }
 
