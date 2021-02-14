@@ -21,7 +21,7 @@ required in the assignment. If you want to check the memory leaks, simply run `v
 ## Node ##
 
 A `Node` is made up of:
-- **item**: an `std::pair<K,V` of key and value (keys are unique inside the tree),
+- **item**: an `std::pair<K,V>` of key and value (keys are unique inside the tree),
   renamed `pair_type`;
 - **left**, **right**: `std::unique_ptr<Node>` to the left and right branch below the current
   node (if any, otherwise the unique pointer points to `nullptr`). We decided to use unique pointers 
@@ -53,12 +53,11 @@ Moreover, we define the `==` operator that confronts the keys of the nodes
 ## Iterator ##
 
 Another item contained in the private implementation of Bst is the iterator
-class. This is contained in `_iterator`, which is used to perform forwarding
-reference; that is, this class is used to build both constant and non-constant
-iterators (later on in the public interface of Bst).
+class. This is contained in `_iterator`, which is used to build both constant and non-constant
+iterators (later on in the public interface of Bst) by using templates.
 
 The definition of `_iterator` is quite standard. The iterator points to a `Node`,
-while the `value_type` (represented by `O` in the forwarding reference) is either a
+while the `value_type` (templated by `O` in `_iterator`) is either a
 `pair_type` or a `const pair_type`. As a clarification, `value_type` inside the class
 `_iterator` does __NOT__ correspond to the value of the key-value pair (which
 instead is templated as `V`), but corresponds to the whole pair of key+value.
@@ -82,8 +81,7 @@ keys).
 
 ## Interface of Bst ##
 
-We now pass to a description of other functions of the class Bst. Some of them belong to 
-the public interface, some to the private.
+We now pass to a description of other functions of the class Bst. 
 
 ### returnMin ###
 
@@ -154,9 +152,9 @@ also perform the find operation, to avoid some code duplication.
 
 ### subscripting operator ###
 
-The subscript operator is then implemented. This is done using a
-forwarding on `_subscript`, in order to consider both the const and
-non-const case. Inside `_subsript`, we use find to find the element (if any).
+The subscript operator is then implemented. This is done templating on `_subscript`, 
+in order to consider both the const and
+non-const case. Inside `_subscript`, we use find to find the element (if any).
 
 ### erase ###
 
