@@ -1,4 +1,18 @@
-# Binary search Tree #
+# Python - Dictionary reverse #
+
+Regarding the python part, we provide a jupyter notebook, named `my_exam.ipynb`, where I did my experimentations with 
+computational time, and `test_exam.py`, that can be run in order to test the implementations.
+
+Inside `my_exam.ipynb` we first define some dictionaries to test.
+Then, we define:
+- `rev_dict`, which reverses the dictionary using for loops;
+- `rev_dict_compr`, which reverses the dictionary using comprehensions.
+
+We then test the speeds using `%%timeit`. 
+
+`test_exam.py` can be easily run by running `pytest` on the directory.
+
+# C++ - Binary search Tree #
 
 The main class implementing the binary search tree is named **Bst**, templated as
 requested in the assignment. 
