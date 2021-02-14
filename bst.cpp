@@ -4,8 +4,6 @@
 #include<memory>
 #include<vector>
 
-//TODO: noexcept?
-
 template<typename K, typename V, typename COMP = std::less<K>>
 class Bst{
 
@@ -59,13 +57,13 @@ class Bst{
         reference operator*() const {return current->item;}
         pointer operator->() const {return &**this;}
 
-        Node* get_current() { return current;}
+        Node* get_current() noexcept { return current;}
 
         //pre-increment
         _iterator& operator++(){   
             if(!current)
                 return *this;
-            else if(current->right)
+            else if(current->right) 
             {
                 current=current->right.get();
                 while(current->left)
@@ -108,7 +106,7 @@ class Bst{
         return p;
     }
     
-    
+    //used to build subscripting on const and non-const
     template<typename O>
     V& _subscript(O&& x){
         iterator i = find(std::forward<O>(x));
@@ -131,8 +129,8 @@ class Bst{
     Bst() = default;    //default ctor
     ~Bst() = default;   //default dtor
 
-    Bst(Bst&&) = default;               //move ctor TODO: check!
-    Bst& operator=(Bst&&) = default;    //move assignment TODO: check!
+    Bst(Bst&&) = default;               //move ctor 
+    Bst& operator=(Bst&&) = default;    //move assignment 
 
     Bst(const Bst& x) {             //copy ctor
         if(x.root){
@@ -190,7 +188,7 @@ class Bst{
         return insert(pair_type{args...});
     }
 
-    void clear(){
+    void clear() noexcept{
         root.reset();
     }
 
@@ -288,77 +286,6 @@ class Bst{
         eraseFromSubtree(root, x);
     }
 
-    //old implementation
-    /*void erase(const K& x){
-        iterator i = find(x);
-        if(i != end()){   //if node exists
-            std::cout << "found! deleting... " << std::endl;
-            
-            Node* p = i.get_current();    
-            Node* p_up = p->up;
-
-            bool is_left = (p == p_up->left.get());
-
-
-            if(!p->left.get() && !p->right.get()){
-                std::cout << "is leaf! " << std::endl;
-                is_left ? p_up->left.reset() : p_up->right.reset() ;
-            }
-            else if(p->left.get() && p->right.get()){
-                std::cout << "has left && right... " << std::endl;
-    
-                Node* ps = (++i).get_current();
-                Node* ps_up = ps->up;
-
-                bool is_left_s = (ps == ps_up->left.get());
-
-                Node* tmp_l = p->left.get();
-                Node* tmp_r = p->right.get();
-                if(is_left && is_left_s){
-                    p_up->left.reset(ps_up->left.release());
-                    p = p_up->left.get();
-                }
-                if(!is_left && is_left_s){
-                    p_up->right.reset(ps_up->left.release());
-                    p = p_up->right.get();
-                }
-                if(is_left && !is_left_s){
-                    p_up->left.reset(ps_up->right.release());
-                    p = p_up->left.get();
-                }
-                if(!is_left && !is_left_s){
-                    p_up->right.reset(ps_up->right.release());
-                    p = p_up->right.get();
-                }
-                std::cout << p << std::endl;
-                std::cout << p->left.get() << std::endl;
-                std::cout << p->right.get() << std::endl;
-                p->up = p_up;
-                p->left.reset(tmp_l);
-                p->right.reset(tmp_r);
-                }
-
-            }
-            else if(p->left.get()){
-                std::cout << "has left... " << std::endl;
-                p->left.get()->up=p_up;
-                if(is_left)
-                    p_up->left.reset(p->left.release());
-                else
-                    p_up->right.reset(p->left.release());
-
-            }
-            else{
-                std::cout << "has right... " << std::endl;
-                p->right.get()->up=p_up;
-                if(is_left)
-                    p_up->left.reset(p->right.release()); 
-                else
-                    p_up->right.reset(p->right.release());
-            }
-        }  
-    }*/
-
     Node* buildBalancedTree(std::vector<pair_type> x, int a, int b){
         if(a>b){
             //std::cout << a << ">" << b << "!" << std::endl;
@@ -391,7 +318,7 @@ class Bst{
         root.reset(buildBalancedTree(v,0,v.size()-1));
     };
 
-    void print_depth(Node* root_){
+    void print_depth(Node* root_) noexcept{
         if(!root_)
             return;
         std::cout << root_->item.first << "\n";
@@ -401,7 +328,7 @@ class Bst{
         print_depth(root_->right.get());
     }
     
-    void print(){
+    void print() noexcept{
         print_depth(root.get());
         std::cout << std::endl;
     }
