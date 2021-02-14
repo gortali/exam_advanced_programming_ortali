@@ -1,20 +1,9 @@
 from collections import defaultdict
 
-
 def reverse_dict(d):
-    #rd = {}
-    #for k, v in d.items():
-    #    for i in v:
-    #        if(i in rd):
-    #            rd[i].append(k)
-    #        else:
-    #            rd[i]=[k]
-    #return rd
-    
     rd = defaultdict(list)
     {rd[v_].append(k) for k, v in d.items()  for v_ in v if not k in rd[v_]}
     return rd    
-
 
 def test_reverse_small_dict():
     d  = {"a": [1, 2, 3], "b": [45, 6], "c": [2, 45]}
