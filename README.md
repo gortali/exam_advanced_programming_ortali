@@ -1,6 +1,6 @@
 # Python - Dictionary reverse #
 
-Regarding the python part, we provide a jupyter notebook, named `my_exam.ipynb`, where I did my experimentations with 
+Regarding the python part, we provide a jupyter notebook, named `my_exam.ipynb`, where we did my experimentations with 
 computational time, and `test_exam.py`, that can be run in order to test the implementations.
 
 Inside `my_exam.ipynb` we first define some dictionaries to test.
@@ -137,7 +137,13 @@ constructor and assignment by using standard implementations.
 ### emplace ###
 
 We define `emplace`, which performs a construction of the pair kay+value and
-inserts it in the tree (by using `insert`).
+inserts it in the tree (by using `_insert`).
+
+We define two different versions of emplace. One which accepts two r-value
+references to key and value, and one that accepts two const l-value references
+to key and value. Different combinations of these could be created, if needed.
+
+Another version is present, commented, that performs the emplace using variadic templates.
 
 ### clear ###
 
@@ -167,8 +173,8 @@ also perform the find operation, to avoid some code duplication.
 ### subscripting operator ###
 
 The subscript operator is then implemented. This is done templating on `_subscript`, 
-in order to consider both the const and
-non-const case. Inside `_subscript`, we use find to find the element (if any).
+in order to consider both l-value and r-value references. 
+Inside `_subscript`, we use `find` to find the element (if any).
 
 ### erase ###
 
@@ -203,7 +209,7 @@ the tree. After that, we pass this vector to the function `buildBalancedTree`
 which builds a balanced tree starting from this vector, and reset the root with
 this newly built tree.
 
-The function `buildBalancedTree` proceeds by recursion. In particular, the
+The function `buildBalancedTree` (defined as static), proceeds by recursion. In particular, the
 function accepts 3 arguments: the vector, and two numbers `a` and `b` that express
 the fact that we want to build the subtree for elements in the vector going
 from index a to index b. Then, inside the function, we compute `h` as the mean
@@ -226,9 +232,10 @@ of all the possible behaviour of the tree class.
 
 We do the following:
 - create a tree templated with int for keys and strings for values. Then we
-and insert some nodes using insert and emplace, and print the tree.
+and insert some nodes using insert, emplace and subscripting, trying both r-values
+and l-values, and print the tree.
 - we then try balancing the tree and print it again.
-- then, we erase some nodes
+- then, we erase some nodes and print it again
 - we then search for two nodes, one present and one not
 - finally, we test the various copy constructors, clearing and copy assignment operators
 
