@@ -8,7 +8,7 @@ template<typename K, typename V, typename COMP = std::less<K>>
 class Bst{
 
     COMP comp = COMP();
-    using pair_type = std::pair<const K, V>;
+    using pair_type = std::pair<K, V>;
 
     struct Node{
         pair_type item;
@@ -106,19 +106,6 @@ class Bst{
         return p;
     }
     
-    //used to build subscripting on const and non-const
-    template<typename O>
-    V& _subscript(O&& x){
-        iterator i = find(std::forward<O>(x));
-        if(i!=end()){   //found!
-            return (*i).second;
-        }
-        else{           //not found, insert...
-            //auto ins = insert(pair_type(x,V()));
-            //if(ins.second)  //if insertion went fine
-            return (*(insert(pair_type{std::forward<O>(x),V{}}).first)).second;    //assume insertion went fine
-        }
-    }
     
     public:
 
@@ -177,16 +164,27 @@ class Bst{
         //std::cout << "call to insert l-value " << std::endl;
         return _insert(x,root);
     }
+
     std::pair<iterator, bool> insert(pair_type&& x){ 
         //std::cout << "call to insert r-value" << std::endl;
         return _insert(std::move(x),root);
     }
     
-    template< class... Types >
-    std::pair<iterator,bool> emplace(Types&&... args){  
-        //assume correct arguments passed...
-        return insert(pair_type{args...});
+    std::pair<iterator,bool> emplace(const K& key, const V& value){  
+        //std::cout << "call to emplace l-value" << std::endl;
+        return _insert(pair_type{key,value},root);
     }
+    
+    std::pair<iterator,bool> emplace(const K&& key, V&& value){  
+        //std::cout << "call to emplace r-value" << std::endl;
+        return _insert(std::move(pair_type{key,value}),root);
+    }
+
+    //version w/ variadic template
+    //template< class... Types >
+    //std::pair<iterator,bool> emplace(Types&&... args){  
+    //    return insert(pair_type{args...});
+    //}
 
     void clear() noexcept{
         root.reset();
@@ -219,6 +217,19 @@ class Bst{
         return const_cast<const_iterator>(find(x));
     }
 
+    template<typename O>
+    V& _subscript(O&& x){
+        iterator i = find(std::forward<O>(x));
+        if(i!=end()){   //found!
+            return (*i).second;
+        }
+        else{           //not found, insert...
+            //auto ins = insert(pair_type(x,V()));
+            //if(ins.second)  //if insertion went fine
+            return (*(insert(pair_type{std::forward<O>(x),V{}}).first)).second;    //assume insertion went fine
+        }
+    }
+    
     V& operator[](const K& x){
         return _subscript(x);
     };
@@ -246,13 +257,13 @@ class Bst{
             }
             else if(!root_->left){
                 //std::cout << "no left..."<< std::endl;
-                Node* tmp = root_->right.release();
+                auto tmp = root_->right.release();
                 tmp->up = root_->up;
                 root_.reset(tmp);
             }
             else if(!root_->right){
                 //std::cout << "no right..." << std::endl;
-                Node* tmp = root_->left.release();
+                auto tmp = root_->left.release();
                 tmp->up = root_->up;
                 root_.reset(tmp);
             
@@ -286,7 +297,7 @@ class Bst{
         eraseFromSubtree(root, x);
     }
 
-    Node* buildBalancedTree(std::vector<pair_type> x, int a, int b){
+    static Node* buildBalancedTree(std::vector<pair_type> x, int a, int b){
         if(a>b){
             //std::cout << a << ">" << b << "!" << std::endl;
             return nullptr;
@@ -350,16 +361,24 @@ class Bst{
 
 
 int main(){
-    Bst<int,std::string> a;
-    a.insert(std::pair<int,std::string>{0,"zero"});
-    a.insert(std::pair<int,std::string>{1,"one"});
+    Bst<const int,std::string> a{};
+    //insert r-value 
+    a.insert(std::pair<const int,std::string>{0,"zero"});
+    a.insert(std::pair<const int,std::string>{1,"one"});
+    a.insert(std::pair<const int,std::string>{100,"one hundred"});
+    //emplace r-value 
     a.emplace(2,"two");
-    a.emplace(3,"three");
-    a[-3]=std::string("minus three");
+    //emplace l-value
+    const int n=3;
+    std::string s{"three"};
+    a.emplace(n,s);
+    //subscripting
     a[-7]=std::string("minus seven");
-    a.insert(std::pair<int,std::string>{-3,"minus three"});
-    a.insert(std::pair<int,std::string>{-3,"minus three - bis"});
-    a.insert(std::pair<int,std::string>{100,"one hundred"});
+    //insert l-value
+    auto lv= std::pair<const int,std::string>{-3,"minus three"};
+    a.insert(lv);
+    //insert already present
+    a.insert(std::pair<const int,std::string>{-3,"minus three - bis"});
     
     //a.print();
     std::cout << "printing a...\n" << a << std::endl;
@@ -390,21 +409,21 @@ int main(){
 
 
     std::cout << "copy ctor + insert -7..." << std::endl;
-    Bst<int,std::string> b=a;
-    b.insert(std::pair<int,std::string>{-7,"minus seven"});
+    Bst<const int,std::string> b=a;
+    b.insert(std::pair<const int,std::string>{-7,"minus seven"});
     std::cout << b << std::endl;
 
     std::cout << "clearing..." << std::endl;
     b.clear();
     std::cout << b << std::endl;
     std::cout << "inserting -7..." << std::endl;
-    b.insert(std::pair<int,std::string>{-7,"minus seven"});
+    b.emplace(-7,"minus seven");
     std::cout << b << std::endl;
 
     std::cout << "copy assignment + insert 7..." << std::endl;
-    Bst<int,std::string> c;
+    Bst<const int,std::string> c;
     c=a;
-    c.insert(std::pair<int,std::string>{7,"seven"});
+    b.emplace(7,"seven");
     std::cout << c << std::endl;
 
 }
